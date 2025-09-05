@@ -1,4 +1,4 @@
-package unit;
+package com.app.boardcraftback.service;
 
 import com.app.boardcraftback.domain.entity.user.Users;
 
