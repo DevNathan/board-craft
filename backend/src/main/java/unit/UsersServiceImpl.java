@@ -1,17 +1,13 @@
-package com.app.boardcraftback.service;
+package unit;
 
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.Users;
 import com.app.boardcraftback.repository.UsersRepository;
-import com.app.boardcraftback.support.error.AppException;
-import com.app.boardcraftback.support.error.ErrorCode;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 import static java.util.Map.of;
 

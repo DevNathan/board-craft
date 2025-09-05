@@ -1,4 +1,4 @@
-package com.app.boardcraftback.service;
+package com.app.boardcraftback.unit;
 
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.Users;
@@ -16,13 +16,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import unit.UsersServiceImpl;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
 
 /**
  * Trace:
@@ -31,7 +33,7 @@ import static org.mockito.Mockito.lenient;
  */
 @ExtendWith(MockitoExtension.class)
 @Tag("REQ-001") // 요구사항 트레이스
-class UsersServiceImplTest {
+class REQ001_signup_UNIT {
 
     @Mock
     UsersRepository usersRepository;
