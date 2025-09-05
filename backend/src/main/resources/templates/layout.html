@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="ko-KR">
+<html
+        lang="ko-KR"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:th="http://www.thymeleaf.org"
+>
 <head>
     <meta charset="UTF-8">
     <!-- 기본 타이틀 패턴 -->
@@ -8,13 +11,16 @@
 
     <!-- 공통 CSS -->
     <link rel="stylesheet" th:href="@{/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
 </head>
 <body>
 <!-- 공통 헤더 -->
+<div id="background">
 <div th:replace="~{fragments/header :: header}"></div>
 
 <!-- 각 페이지에서 덮어쓸 부분 -->
 <main layout:fragment="content"></main>
+</div>
 </body>
 </html>

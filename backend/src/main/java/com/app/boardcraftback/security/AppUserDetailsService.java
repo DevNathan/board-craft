@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CustomUserDetailsService implements UserDetailsService {
+public class AppUserDetailsService implements UserDetailsService {
     private final UsersRepository usersRepository;
 
     @Override
@@ -23,6 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 () -> new UsernameNotFoundException("User not found with email: " + email)
         );
 
-        return new CustomUserDetails(user);
+        return new AppUserDetails(user);
     }
 }

@@ -1,5 +1,6 @@
 package com.app.boardcraftback.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,28 +11,49 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final AppUserDetailsService userDetailsService;
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/",                 // 홈
-            "/auth/**",          // (폼 화면 등)
-            "/posts/**",         // 게시글 공개 영역
-            "/api/v1/auth/signup"// 회원가입 API 열기
+            "/",
+            "/auth/**",
+            "/posts/**",
+            "/api/v1/auth/signup",
+            "/swagger-ui/index.html",
     };
 
     @Bean
+    AuthenticationFailureHandler authFailureHandler() {
+        return (req, res, ex) -> {
+            ex.printStackTrace(); // 콘솔에도 남김
+            res.sendRedirect("/auth/signin?error=" + ex.getClass().getSimpleName());
+        };
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        var successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        successHandler.setTargetUrlParameter("redirect");
+        successHandler.setDefaultTargetUrl("/");
+        successHandler.setAlwaysUseDefaultTargetUrl(false);
+        successHandler.setUseReferer(true);
+
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
+
+                .userDetailsService(userDetailsService)
 
                 .authorizeHttpRequests(auth -> auth
                         // 정적 리소스(정말 모두 허용)
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+
 
                         // CORS preflight 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -41,6 +63,22 @@ public class SecurityConfig {
 
                         // 그 외는 인증 필요
                         .anyRequest().permitAll()
+                )
+
+                .formLogin(login -> login
+                        .loginPage("/auth/signin")
+                        .loginProcessingUrl("/auth/signin")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .successHandler(successHandler)
+                        .failureHandler(authFailureHandler())
+                )
+
+                .logout(logout -> logout
+                        .logoutUrl("/auth/signout")
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                 );
 
         return http.build();

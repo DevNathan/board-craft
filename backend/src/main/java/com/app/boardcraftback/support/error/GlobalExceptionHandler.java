@@ -42,6 +42,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAny(Exception ex, HttpServletRequest req) {
         var code = ErrorCode.INTERNAL_ERROR;
+        ex.printStackTrace();
         return build(req, code.getStatus(), code.name(), code.getMessage(), null);
     }
 

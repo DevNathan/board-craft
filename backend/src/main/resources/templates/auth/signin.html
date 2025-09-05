@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko-KR"
+      layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>로그인</title>
+    <style>
+        .login-box {
+            max-width: 380px;
+            margin: 60px auto;
+            padding: 32px 28px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .login-form {
+            display: grid;
+            gap: 18px;
+        }
+
+        .login-form .field label {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .login-form .field input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .login-form .field input:focus {
+            border-color: #2980b9;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #2962ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #1f4fe0;
+        }
+
+        .login-subtext {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .login-subtext a {
+            color: #2962ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<section class="login-box" layout:fragment="content">
+    <h2 class="login-title">로그인</h2>
+
+    <form class="login-form" method="post" th:action="@{/auth/signin}">
+        <div class="field">
+            <label for="email">이메일</label>
+            <input id="email" name="email" placeholder="example@mail.com" required type="email"/>
+        </div>
+
+        <div class="field">
+            <label for="password">비밀번호</label>
+            <input id="password" name="password" placeholder="••••••" required type="password"/>
+        </div>
+
+        <div>
+            <button class="login-btn" type="submit">로그인</button>
+        </div>
+    </form>
+
+    <p class="login-subtext">
+        아직 회원이 아니신가요?
+        <a th:href="@{/auth/signup}">회원가입</a>
+    </p>
+</section>
+</body>
+</html>

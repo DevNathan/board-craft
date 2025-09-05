@@ -13,14 +13,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter @ToString
-public class CustomUserDetails implements UserDetails {
+public class AppUserDetails implements UserDetails {
     private final String userId;   // UUID 문자열(CHAR(36))
     private final String email;    // 로그인용
     private final String password; // bcrypt
     private final boolean enabled;
     private final Set<RoleType> roles;
 
-    public CustomUserDetails(Users u) {
+    public AppUserDetails(Users u) {
         this.userId = u.getId();
         this.email = u.getEmail();
         this.password = u.getPasswordHash();

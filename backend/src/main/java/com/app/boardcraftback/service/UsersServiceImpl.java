@@ -33,10 +33,10 @@ public class UsersServiceImpl implements UsersService {
      * @param terms       서비스 약관 동의 여부
      * @return 저장된 {@link Users} 엔티티
      *
-     * @throws IllegalArgumentException  약관에 동의하지 않은 경우
      * @throws FieldValidationException
      *         입력 필드가 비즈니스 규칙을 위반한 경우.
      *         <ul>
+     *           <li>{@code terms}: 약관에 동의하지 않은 경우</li>
      *           <li>{@code email}: 이미 사용 중인 이메일</li>
      *           <li>{@code nickname}: 이미 사용 중인 닉네임</li>
      *         </ul>
@@ -48,13 +48,13 @@ public class UsersServiceImpl implements UsersService {
      */
     @Override
     public Users registerUser(String rawEmail, String rawPassword, String nickname, boolean terms) {
-        if (!terms) throw new IllegalArgumentException("terms not accepted");
+        if (!terms) throw new FieldValidationException(of("terms", "약관 동의가 필요합니다."));
 
         final String email = rawEmail == null ? "" : rawEmail.trim().toLowerCase();
 
-        // 이메일 고유 무결성 검증 -> IllegalStateException
+        // 이메일 고유 무결성 검증
         assertEmailAvailable(email);
-        // 닉네임 고유 무결성 검증 -> IllegalStateException
+        // 닉네임 고유 무결성 검증
         assertNicknameAvailable(nickname);
 
         String hashed = passwordEncoder.encode(rawPassword);

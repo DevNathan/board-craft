@@ -1,13 +1,353 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}" lang="ko-KR">
+<html lang="ko-KR"
+      layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>BoardCraft Main</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <style>
+        .home-wrap {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        /* Hero */
+        .home-hero {
+            background: linear-gradient(135deg, #2962ff 0%, #4f83ff 100%);
+            color: #fff;
+            border-radius: 14px;
+            padding: 28px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .home-hero h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .home-hero p {
+            margin: 0;
+            opacity: .95;
+        }
+
+        .home-cta {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .home-btn {
+            appearance: none;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .home-btn.primary {
+            background: #fff;
+            color: #2962ff;
+        }
+
+        .home-btn.ghost {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .6);
+        }
+
+        /* Quick stats */
+        .home-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .home-stat {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .home-stat .k {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .home-stat .t {
+            color: #666;
+            font-size: .9rem;
+        }
+
+        /* Feature cards */
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .home-card {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 12px;
+            padding: 16px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .home-card h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .home-card p {
+            margin: 0;
+            color: #555;
+            font-size: .95rem;
+        }
+
+        .home-card a {
+            color: #2962ff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .home-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Recent posts */
+        .home-section-title {
+            margin: 22px 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .home-posts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .home-post {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 12px;
+            padding: 14px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .home-post .meta {
+            color: #777;
+            font-size: .85rem;
+        }
+
+        .home-post .title {
+            font-weight: 800;
+            font-size: 1.02rem;
+        }
+
+        .home-post .excerpt {
+            color: #555;
+            font-size: .95rem;
+        }
+
+        .home-post a {
+            color: #2962ff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .home-post a:hover {
+            text-decoration: underline;
+        }
+
+        /* 공간 최적화 + 가독성 향상 */
+        .linus-section{
+            margin-top:24px;
+            background:#fff;
+            border:1px solid #e6e8eb;
+            border-radius:14px;
+            padding:20px 24px;
+            display:grid;
+            grid-template-columns: 180px 1fr; /* 좌: 사진, 우: 텍스트 */
+            gap:18px;                          /* 사진-텍스트 간격 ↑ */
+            align-items:center;
+            box-shadow:0 2px 8px rgba(0,0,0,.05);
+        }
+
+        .linus-photo{
+            width:180px; height:180px;
+            object-fit:cover;                  /* 크롭로 깔끔 */
+            border-radius:12px;
+            border:1px solid #ddd;
+        }
+
+        .linus-text{
+            display:grid;
+            gap:10px;                          /* 문단 간격 ↑ */
+            line-height:1.6;                   /* 숨 쉬게 */
+            color:#333;
+            max-width: 720px;                  /* 텍스트 줄 길이 제한 */
+        }
+
+        .linus-text h2{
+            margin:0 0 4px;
+            font-size:1.35rem;
+            letter-spacing:.2px;
+        }
+
+        .linus-text p{ margin:0; }
+
+        .linus-quote{
+            margin:4px 0 0;
+            padding-left:12px;
+            border-left:4px solid #2962ff;
+            font-style:italic;
+        }
+
+        .linus-quote-meta{
+            display:block;
+            margin-top:6px;
+            font-style:normal;
+            color:#666;
+            font-size:.92rem;
+        }
+
+        /* 모바일 대응: 세로 스택 + 가운데 정렬 */
+        @media (max-width: 700px){
+            .linus-section{
+                grid-template-columns: 1fr;
+                justify-items:center;
+                text-align:center;
+                padding:18px;
+            }
+            .linus-photo{ width:160px; height:160px; }
+            .linus-quote{ text-align:left; margin-inline:auto; max-width: 90%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .home-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .home-stats {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .home-posts {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .home-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .home-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .home-bg {
+            padding: 18px 0 28px;
+        }
+    </style>
 </head>
 <body>
-<section layout:fragment="content">
-    <p>게시판 메인 페이지</p>
+<section class="home-bg" layout:fragment="content">
+    <div class="home-wrap">
+
+        <!-- Hero -->
+        <div class="home-hero">
+            <h1>BoardCraft</h1>
+            <p>빠르고 간결한 게시판. 필요 없는 건 걷어내고 본질만 남겼다.</p>
+            <div class="home-cta">
+                <a class="home-btn primary" th:href="@{/posts}">Browse Posts</a>
+                <a class="home-btn ghost" th:href="@{/auth/signin}">Sign in</a>
+                <a class="home-btn ghost" th:href="@{/auth/signup}">Sign up</a>
+            </div>
+        </div>
+
+        <!-- Quick stats -->
+        <div class="home-stats">
+            <div class="home-stat">
+                <div class="k" th:text="${stats != null ? stats.postCount : 0}">0</div>
+                <div class="t">Posts</div>
+            </div>
+            <div class="home-stat">
+                <div class="k" th:text="${stats != null ? stats.userCount : 0}">0</div>
+                <div class="t">Users</div>
+            </div>
+            <div class="home-stat">
+                <div class="k" th:text="${stats != null ? stats.todayViews : 0}">0</div>
+                <div class="t">Today views</div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="home-grid">
+            <div class="home-card">
+                <h3>간결한 작성</h3>
+                <p>필수만 남긴 포스트 작성 플로우.<br>속도는 곧 생명이다.</p>
+                <a th:href="@{/posts}">바로가기</a>
+            </div>
+            <div class="home-card">
+                <h3>검색 & 태그</h3>
+                <p>키워드와 태그로 필요한 정보만 콕 집어낸다.<br>시간은 금이다.</p>
+                <a th:href="@{/posts}">검색하러 가기</a>
+            </div>
+            <div class="home-card">
+                <h3>권한 제어</h3>
+                <p>USER/MOD/ADMIN 롤 뱃지로 딱 구분.<br>질서는 곧 자유다.</p>
+                <a th:href="@{/auth/signin}">관리 도구</a>
+            </div>
+        </div>
+
+        <h2 class="home-section-title">최근 게시물</h2>
+        <div class="home-posts">
+            <div class="home-post" th:each="p : ${recentPosts}">
+                <div class="meta" th:text="${#temporals.format(p.createdAt, 'yyyy.MM.dd HH:mm')}">2025.09.06 12:00</div>
+                <div class="title" th:text="${p.title}">포스트 제목</div>
+                <div class="excerpt" th:text="${p.excerpt}">간단한 요약이 들어갑니다…</div>
+                <a th:href="@{|/posts/${p.id}|}">읽기</a>
+            </div>
+
+            <!-- 데이터 없을 때 플레이스홀더 -->
+            <div class="home-post" th:if="${recentPosts == null or #lists.isEmpty(recentPosts)}">
+                <div class="meta">—</div>
+                <div class="title">아직 게시물이 없습니다</div>
+                <div class="excerpt">첫 포스트를 작성해 무대를 열어라.</div>
+                <a th:href="@{/posts}">목록으로</a>
+            </div>
+        </div>
+
+        <!-- Linus Tribute -->
+        <div class="linus-section">
+            <img src="/images/linus.webp" alt="Linus Torvalds" class="linus-photo"/>
+
+            <div class="linus-text">
+                <h2>인류 최고의 개발자</h2>
+                <p>
+                    리눅스 커널과 Git을 만든 사나이이자,
+                    규칙 파괴자들과의 싸움에서 타협하지 않는
+                    불가침 영역의 소유자, <strong>Linus Torvalds</strong>
+                </p>
+                <blockquote class="linus-quote">
+                    "Talk is cheap. Show me the code."
+                    <span class="linus-quote-meta">— 세상을 바꾼 깃발, 토발즈</span>
+                </blockquote>
+            </div>
+        </div>
+    </div>
 </section>
 </body>
 </html>

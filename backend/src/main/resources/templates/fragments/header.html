@@ -1,12 +1,38 @@
-<div th:fragment="header">
-    <header>
-        <h1>BoardCraft</h1>
-        <nav>
-            <a th:href="@{/}">Home</a>
-            <a th:href="@{/posts}">Posts</a>
-            <a th:href="@{/auth/login}">Login</a>
-            <a th:href="@{/auth/register}">Register</a>
-        </nav>
-        <hr/>
+<!— templates/fragments/header.html —>
+<div th:fragment="header"
+     xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+     xmlns:th="http://www.thymeleaf.org">
+    <header class="header-bar">
+        <div class="header-inner">
+            <h1 class="header-logo">
+                <a th:href="@{/}">BoardCraft</a>
+            </h1>
+            <nav class="header-nav">
+                <a th:href="@{/posts}">Posts</a>
+
+                <!-- 비로그인(익명) -->
+                <span class="header-auth" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/signin}">Sign in</a>
+                    <a th:href="@{/auth/signup}">Sign up</a>
+                </span>
+
+                <!-- 로그인됨 -->
+                <span class="header-auth" sec:authorize="isAuthenticated()">
+                    <span class="header-user">
+                        <strong sec:authentication="principal.email">유저</strong>
+                        <!-- 역할 뱃지 -->
+                        <span class="role-badge admin" sec:authorize="hasRole('ADMIN')">ADMIN</span>
+                        <span class="role-badge mod" sec:authorize="hasRole('MOD')">MOD</span>
+                        <span class="role-badge user" sec:authorize="hasRole('USER')">USER</span>
+                    </span>
+
+                    <form class="logout-form" method="post" th:action="@{/auth/signout}">
+                        <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                               type="hidden"/>
+                        <button type="submit">Sign out</button>
+                    </form>
+                </span>
+            </nav>
+        </div>
     </header>
 </div>

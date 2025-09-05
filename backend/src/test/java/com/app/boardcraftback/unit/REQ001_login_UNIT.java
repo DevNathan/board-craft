@@ -4,7 +4,7 @@ package com.app.boardcraftback.unit;
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.Users;
 import com.app.boardcraftback.repository.UsersRepository;
-import com.app.boardcraftback.security.CustomUserDetailsService;
+import com.app.boardcraftback.security.AppUserDetailsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class REQ001_login_UNIT {
     UsersRepository usersRepository;
 
     @InjectMocks
-    CustomUserDetailsService userDetailsService;
+    AppUserDetailsService userDetailsService;
 
     private Users user(String email, boolean enabled, Set<RoleType> roles) {
         return Users.builder()
