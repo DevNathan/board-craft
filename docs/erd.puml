@@ -1,0 +1,115 @@
+@startuml
+hide methods
+hide stereotypes
+
+' ===== Entities =====
+entity "USERS" as USERS {
+  * id : UUID <<PK>>
+  --
+  email : varchar <<UNIQUE>>
+  password_hash : varchar
+  nickname : varchar <<UNIQUE>>
+  enabled : boolean
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "ROLES" as ROLES {
+  * name : varchar <<PK>>   ' USER, MOD, ADMIN
+}
+
+entity "USER_ROLES" as USER_ROLES {
+  * user_id : UUID <<PK, FK -> USERS.id>>
+  * role_name : varchar <<PK, FK -> ROLES.name>>
+}
+
+entity "CATEGORIES" as CATEGORIES {
+  * id : UUID <<PK>>
+  --
+  name : varchar <<UNIQUE>>
+  path : varchar <<UNIQUE>>  ' 예: tech/backend
+}
+
+entity "POSTS" as POSTS {
+  * id : UUID <<PK>>
+  --
+  author_id : UUID <<FK -> USERS.id>>
+  slug : varchar <<UNIQUE>>
+  title : varchar
+  content_md : text
+  category_id : UUID <<FK -> CATEGORIES.id>>
+  is_published : boolean
+  published_at : datetime
+  is_hidden : boolean        ' 모더레이션 숨김
+  is_deleted : boolean       ' 소프트 삭제
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "TAGS" as TAGS {
+  * id : UUID <<PK>>
+  --
+  name : varchar <<UNIQUE>>
+}
+
+entity "POST_TAGS" as POST_TAGS {
+  * post_id : UUID <<PK, FK -> POSTS.id>>
+  * tag_id  : UUID <<PK, FK -> TAGS.id>>
+}
+
+entity "COMMENTS" as COMMENTS {
+  * id : UUID <<PK>>
+  --
+  post_id : UUID <<FK -> POSTS.id>>
+  author_id : UUID <<FK -> USERS.id>>
+  parent_id : UUID <<FK -> COMMENTS.id>>  ' 1-레벨 대댓글만 허용(검증으로 제한)
+  content_md : text
+  is_hidden : boolean
+  is_deleted : boolean
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "ATTACHMENTS" as ATTACHMENTS {
+  * id : UUID <<PK>>
+  --
+  post_id : UUID <<FK -> POSTS.id>>
+  key_path : varchar         ' 예: post/20250903/uuid.webp
+  original_name : varchar
+  size_bytes : bigint
+  content_type : varchar
+}
+
+' 기본 모더레이션: 신고/숨김/블럭
+entity "REPORTS" as REPORTS {
+  * id : UUID <<PK>>
+  --
+  reporter_id : UUID <<FK -> USERS.id>>
+  subject_id : UUID          ' POSTS.id 또는 COMMENTS.id
+  subject_type : enum('POST','COMMENT')
+  reason : varchar
+  created_at : datetime
+}
+
+entity "USER_RESTRICTIONS" as USER_RESTRICTIONS {
+  * id : UUID <<PK>>
+  --
+  user_id : UUID <<FK -> USERS.id>>
+  restricted_until : datetime
+  reason : varchar
+  created_by : UUID <<FK -> USERS.id>>   ' MOD/ADMIN
+  created_at : datetime
+}
+
+' ===== Relationships =====
+USERS ||--o{ POSTS : writes
+USERS ||--o{ COMMENTS : writes
+USERS }o--o{ ROLES : has via USER_ROLES
+POSTS ||--o{ COMMENTS : has
+POSTS ||--o{ ATTACHMENTS : has
+POSTS }o--o{ TAGS : tagged via POST_TAGS
+POSTS }o--|| CATEGORIES : in
+USERS ||--o{ REPORTS : files
+USERS ||--o{ USER_RESTRICTIONS : has
+
+@enduml

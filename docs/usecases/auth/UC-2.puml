@@ -1,0 +1,38 @@
+@startuml
+title UC-06 회원 탈퇴 (세션 방식)
+
+actor 사용자 as User
+participant "웹/앱 클라이언트" as Client
+participant "Account API" as API
+participant "AccountService" as Svc
+database "DB(Users)" as DB
+database "SessionStore" as SS
+
+== 탈퇴 확인 페이지 ==
+User -> Client : /account/delete 접근
+Client -> API : GET /account/delete
+API --> Client : 200 OK (확인 폼 + CSRF)
+
+== 탈퇴 요청 ==
+User -> Client : 현재 비밀번호 입력 후 확인
+Client -> API : POST /account/delete {password, csrf} (Cookie: SESSIONID)
+
+API -> Svc : deleteAccount(userId, password, ctx)
+Svc -> Svc : CSRF 검증, 레이트리밋 체크
+Svc -> DB : 사용자 조회 + 비밀번호 검증
+alt 인증 성공
+  alt 소프트 삭제 정책
+    Svc -> DB : 사용자 상태=DELETED(탈퇴시각/사유 기록)
+  else 하드 삭제 정책
+    Svc -> DB : 사용자 레코드 및 관련 비식별 데이터 처리
+  end
+  Svc -> SS : 현재 세션 무효화
+  Svc -> SS : 해당 사용자의 모든 세션 무효화(전역 로그아웃)
+  Svc --> API : OK
+  API --> Client : 204 No Content \nSet-Cookie: SESSIONID=; Max-Age=0; HttpOnly; Secure; SameSite=Lax
+  Client -> User : 탈퇴 완료 화면
+else 인증 실패
+  Svc --> API : 401 Unauthorized / 400 BadRequest
+  API --> Client : 오류 표시(비밀번호 불일치/요청 무효)
+end
+@enduml

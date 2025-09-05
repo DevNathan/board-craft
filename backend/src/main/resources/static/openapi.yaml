@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: BoardCraft API
+  version: 0.1.0
+servers:
+  - url: /api/v1
+paths:
+  /auth/signup:
+    post:
+      tags: [Auth]
+      summary: 회원가입
+      operationId: authSignup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              sample:
+                value:
+                  email: johndoe@example.com
+                  nickname: johndoe
+                  password: SuperSecret123!
+                  terms: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              examples:
+                created:
+                  value:
+                    userId: "550e8400-e29b-41d4-a716-446655440000"
+                    email: johndoe@example.com
+                    nickname: nathan
+        '400':
+          description: Validation error or terms not accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                termsNotAccepted:
+                  value:
+                    timestamp: "2025-09-02T12:34:56Z"
+                    traceId: "..."
+                    path: "/api/v1/auth/signup"
+                    error:
+                      code: "terms not accepted"
+                      message: "요청이 올바르지 않습니다."
+                    validation: {}
+                fieldErrors:
+                  value:
+                    timestamp: "2025-09-02T12:34:56Z"
+                    traceId: "..."
+                    path: "/api/v1/auth/signup"
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "입력값이 올바르지 않습니다."
+                    validation:
+                      email: "must be a well-formed email address"
+                      password: "size must be between 8 and 72"
+        '409':
+          description: Duplicate email or nickname
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emailExists:
+                  value:
+                    timestamp: "2025-09-02T12:34:56Z"
+                    traceId: "..."
+                    path: "/api/v1/auth/signup"
+                    error:
+                      code: "EMAIL_ALREADY_USED"
+                      message: "요청 처리 중 오류가 발생했습니다."
+                    validation: {}
+                nicknameExists:
+                  value:
+                    timestamp: "2025-09-02T12:34:56Z"
+                    traceId: "..."
+                    path: "/api/v1/auth/signup"
+                    error:
+                      code: "NICKNAME_ALREADY_USED"
+                      message: "요청 처리 중 오류가 발생했습니다."
+                    validation: {}
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, nickname, terms]
+      properties:
+        email:
+          type: string
+          format: email
+          description: 로그인에 사용될 이메일(서버에서 소문자 정규화)
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 50
+        password:
+          type: string
+          minLength: 8
+          maxLength: 72
+          description: BCrypt 해싱 대상
+        terms:
+          type: boolean
+          description: 약관 동의 여부(필수)
+    RegisterResponse:
+      type: object
+      required: [userId, email, nickname]
+      properties:
+        userId:
+          type: string
+          description: 생성된 사용자 ID(UUID 문자열, CHAR(36))
+        email:
+          type: string
+          format: email
+        nickname:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [timestamp, traceId, path, error]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        traceId:
+          type: string
+          description: 요청 단위 추적 ID
+        path:
+          type: string
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        validation:
+          type: object
+          additionalProperties:
+            type: string
+          description: 필드별 오류 메시지 맵(없으면 생략 가능)
+    ErrorDetail:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

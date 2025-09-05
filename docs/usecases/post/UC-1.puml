@@ -1,0 +1,23 @@
+@startuml
+title UC-01 게시글 목록 보기 (필터/정렬/페이지네이션)
+
+actor 사용자 as User
+participant "웹/앱 클라이언트" as Client
+participant "BoardCraft API" as API
+participant "PostService" as Service
+database "DB(Posts, Tags, Categories)" as DB
+
+User -> Client : 게시글 목록 페이지 접속
+Client -> API : GET /api/v1/posts\n?query&tag&category&sort&page&size
+
+API -> Service : listPosts(params, user)
+
+Service -> Service : 권한 기반 가시성 필터 적용
+
+Service -> DB : 게시글 목록 조회(검색/필터/정렬/페이지네이션)
+DB --> Service : posts[]
+
+Service --> API : PostDTO 목록 + 페이지 메타
+API --> Client : 200 OK + JSON
+Client --> User : 게시글 목록 + 페이지네이션 렌더링
+@enduml

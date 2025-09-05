@@ -1,0 +1,42 @@
+@startuml
+title UC-04 로그인 (세션 방식)
+
+actor 사용자 as User
+participant "클라이언트" as Client
+participant "Auth API" as API
+participant "AuthService" as Svc
+database "SessionStore" as SS
+database "DB(Users)" as DB
+
+==로그인==
+User -> Client : 로그인 페이지 접속
+Client -> API : GET /auth/login
+API --> Client : 200 폼(+CSRF)
+
+User -> Client : 자격 제출
+Client -> API : POST /auth/login {email, password, csrf}
+API -> Svc : authenticate(email, password)
+Svc -> DB : 사용자 조회/검증
+DB --> Svc : 프로필/권한
+
+alt 성공
+  Svc -> SS : 세션 생성(유저ID/권한/만료)
+  Svc --> API : sessionId
+  API --> Client : 302 Redirect / \nSet-Cookie: SESSIONID=...; HttpOnly; Secure; SameSite=Lax
+  Client --> User : 로그인 화면 렌더링
+else 실패
+  Svc --> API : Unauthorized
+  API --> Client : 401 + 오류메시지
+  Client --> User : 로그인 실패 사유 전달
+end
+==로그아웃==
+title 로그아웃 (세션 전용)
+
+User -> Client : 로그아웃 클릭
+Client -> API : POST /auth/logout (Cookie: SESSIONID)
+API -> Svc : logout(sessionId)
+Svc -> SS : 세션 삭제
+Svc --> API : OK
+API --> Client : 204 No Content \nSet-Cookie: SESSIONID=; Max-Age=0; HttpOnly; Secure; SameSite=Lax
+Client --> User : 로그아웃 화면 렌더링
+@enduml

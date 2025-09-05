@@ -1,0 +1,38 @@
+@startuml
+title UC-05 회원 가입 (세션 방식)
+
+actor 사용자 as User
+participant "웹/앱 클라이언트" as Client
+participant "Auth API" as API
+participant "AuthService" as Svc
+database "DB(Users)" as DB
+database "SessionStore" as SS
+
+== 가입 폼 로드 ==
+User -> Client : /auth/signup 접근
+Client -> API : GET /auth/signup
+API --> Client : 200 OK (폼 + CSRF)
+
+== 가입 요청 ==
+User -> Client : 이메일/닉네임/비밀번호 입력
+Client -> API : POST /auth/signup {email, nickname, password, terms, csrf}
+
+API -> Svc : register(command, ctx)
+Svc -> Svc : 입력 검증(형식/중복/길이/약관/비번정책)
+alt 검증 통과
+  Svc -> Svc : 비밀번호 해시(BCrypt)
+  Svc -> DB : 사용자 생성
+  DB --> Svc : 사용자 ID/프로필
+  alt 가입 후 자동 로그인
+    Svc -> SS : 세션 생성(사용자ID/권한/만료)
+    Svc --> API : sessionId
+    API --> Client : 302 Redirect / \nSet-Cookie: SESSIONID=...; HttpOnly; Secure; SameSite=Lax
+  else 로그인 별도
+    Svc --> API : 201 Created
+    API --> Client : 201 Created (로그인 페이지 유도)
+  end
+else 검증 실패
+  Svc --> API : 400 BadRequest(필드별 에러)
+  API --> Client : 400 + 에러 메시지
+end
+@enduml
