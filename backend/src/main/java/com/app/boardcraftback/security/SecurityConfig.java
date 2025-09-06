@@ -12,7 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 @Configuration
 @EnableWebSecurity
@@ -29,20 +31,35 @@ public class SecurityConfig {
     };
 
     @Bean
-    AuthenticationFailureHandler authFailureHandler() {
-        return (req, res, ex) -> {
-            ex.printStackTrace(); // 콘솔에도 남김
-            res.sendRedirect("/auth/signin?error=" + ex.getClass().getSimpleName());
+    public AuthenticationSuccessHandler loginSuccessHandler() {
+        var base = new SavedRequestAwareAuthenticationSuccessHandler();
+        base.setTargetUrlParameter("redirect");
+        base.setDefaultTargetUrl("/");
+        base.setAlwaysUseDefaultTargetUrl(false);
+        base.setUseReferer(false);
+
+        return (request, response, authentication) -> {
+            var cache = new HttpSessionRequestCache();
+            var saved = cache.getRequest(request, response);
+
+            if (saved != null) { // 보호 리소스에서 튕겨온 케이스
+                base.onAuthenticationSuccess(request, response, authentication);
+                return;
+            }
+
+            // 직접 /auth/signin에서 로그인한 케이스 처리
+            String redirect = request.getParameter("redirect");
+            if (redirect != null && redirect.startsWith("/") && !redirect.startsWith("//")
+                    && !redirect.startsWith("/auth/signin")) {
+                response.sendRedirect(redirect);
+            } else {
+                response.sendRedirect("/");
+            }
         };
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        var successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        successHandler.setTargetUrlParameter("redirect");
-        successHandler.setDefaultTargetUrl("/");
-        successHandler.setAlwaysUseDefaultTargetUrl(false);
-        successHandler.setUseReferer(true);
 
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -62,7 +79,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
 
                         // 그 외는 인증 필요
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 .formLogin(login -> login
@@ -70,8 +87,8 @@ public class SecurityConfig {
                         .loginProcessingUrl("/auth/signin")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .successHandler(successHandler)
-                        .failureHandler(authFailureHandler())
+                        .successHandler(loginSuccessHandler())
+                        .failureUrl("/auth/signin?error=true")
                 )
 
                 .logout(logout -> logout
