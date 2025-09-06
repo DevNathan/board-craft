@@ -23,12 +23,12 @@ public class AuthViewController {
     private final UsersService usersService;
 
     @GetMapping("/signup")
-    public String signup() {
+    public String goto_signup() {
         return "auth/signup";
     }
 
     @GetMapping("/signin")
-    public String signin() {
+    public String goto_signin() {
         return "auth/signin";
     }
 

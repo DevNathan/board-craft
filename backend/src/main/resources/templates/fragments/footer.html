@@ -1,0 +1,29 @@
+<div th:fragment="footer" xmlns:th="http://www.thymeleaf.org">
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="foot-brand">
+                <strong class="brand">BoardCraft</strong>
+                <p class="tagline">Make it simple. Make it fast.</p>
+            </div>
+
+            <nav class="foot-nav">
+                <a th:href="@{/}">Home</a>
+                <a th:href="@{/posts}">Posts</a>
+                <a th:href="@{/auth/signin}">Sign in</a>
+                <a th:href="@{/auth/signup}">Sign up</a>
+            </nav>
+
+            <div class="foot-meta">
+        <span class="copy">
+          &copy; <span th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'yyyy')}">2025</span> BoardCraft
+        </span>
+                <span class="sp">·</span>
+                <a th:href="@{/privacy}">Privacy</a>
+                <span class="sp">·</span>
+                <a th:href="@{/terms}">Terms</a>
+                <a class="back-top" href="#" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">Back
+                    to top</a>
+            </div>
+        </div>
+    </footer>
+</div>

@@ -7,20 +7,25 @@
 <head>
     <meta charset="UTF-8">
     <!-- 기본 타이틀 패턴 -->
-    <title layout:title-pattern="$CONTENT_TITLE - BoardCraft">>BoardCraft</title>
+    <title layout:title-pattern="$CONTENT_TITLE - BoardCraft">BoardCraft</title>
 
     <!-- 공통 CSS -->
     <link rel="stylesheet" th:href="@{/css/reset.css}">
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
 </head>
 <body>
 <!-- 공통 헤더 -->
 <div id="background">
-<div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 
-<!-- 각 페이지에서 덮어쓸 부분 -->
-<main layout:fragment="content"></main>
+    <!-- 각 페이지에서 덮어쓸 부분 -->
+    <main id="main">
+        <div layout:fragment="content"></div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 </div>
 </body>
 </html>
