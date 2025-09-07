@@ -19,7 +19,7 @@
                 <!-- 로그인됨 -->
                 <span class="header-auth" sec:authorize="isAuthenticated()">
                     <span class="header-user">
-                        <strong sec:authentication="principal.email">유저</strong>
+                        <strong sec:authentication="principal.appUser.nickname">유저</strong>
                         <!-- 역할 뱃지 -->
                         <span class="role-badge admin" sec:authorize="hasRole('ADMIN')">ADMIN</span>
                         <span class="role-badge mod" sec:authorize="hasRole('MOD')">MOD</span>

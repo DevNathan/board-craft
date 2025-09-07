@@ -1,11 +1,207 @@
 <!DOCTYPE html>
 <html lang="ko-KR"
       layout:decorate="~{layout}"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>내 계정</title>
+
+    <style>
+        .account-bg {
+            padding: 18px 0 28px;
+        }
+
+        .account-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .account-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .account-title {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .account-card {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+        }
+
+        .account-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .account-row {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+        }
+
+        .account-row dt {
+            width: 110px;
+            color: #666;
+            font-size: .95rem;
+        }
+
+        .account-row dd {
+            margin: 0;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .roles {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .role-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: .85rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .role-badge.admin {
+            background: #e74c3c;
+        }
+
+        .role-badge.mod {
+            background: #f39c12;
+        }
+
+        .role-badge.user {
+            background: #27ae60;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid #e0e3e7;
+            background: #fff;
+            color: #222;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            border-color: #2962ff;
+            background: #2962ff;
+            color: #fff;
+        }
+
+        .btn.danger {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: #fff;
+        }
+
+        .account-empty a {
+            color: #2962ff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        @media (max-width: 720px) {
+            .account-row {
+                flex-direction: column;
+                gap: 4px
+            }
+
+            .account-row dt {
+                width: auto
+            }
+        }
+    </style>
 </head>
 <body>
-<div>계정 관리 페이지</div>
+<section class="account-bg" layout:fragment="content">
+    <div class="account-wrap">
+        <div class="account-head">
+            <h1 class="account-title">내 계정</h1>
+            <div class="account-actions">
+                <form method="post" style="margin:0" th:action="@{/auth/signout}">
+                    <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"
+                           type="hidden"/>
+                    <button class="btn" type="submit">Sign out</button>
+                </form>
+                <!-- 회원탈퇴 트리거 -->
+                <button class="btn danger" data-modal-target="deleteAccountModal" type="button">회원탈퇴</button>
+            </div>
+        </div>
+
+        <div class="account-card">
+            <dl class="account-list">
+                <div class="account-row">
+                    <dt>사용자 ID</dt>
+                    <dd sec:authentication="principal.appUser.userId">—</dd>
+                </div>
+                <div class="account-row">
+                    <dt>닉네임</dt>
+                    <dd sec:authentication="principal.appUser.nickname">—</dd>
+                </div>
+                <div class="account-row">
+                    <dt>이메일</dt>
+                    <dd sec:authentication="principal.appUser.email">—</dd>
+                </div>
+                <div class="account-row">
+                    <dt>권한</dt>
+                    <dd>
+                        <div class="roles" th:with="roles=${#authentication.principal.appUser.roles}">
+                <span class="role-badge"
+                      th:classappend="${r.name()=='ADMIN'} ? ' admin' : (${r.name()=='MOD'} ? ' mod' : ' user')"
+                      th:each="r : ${roles}"
+                      th:text="${r}">USER</span>
+                        </div>
+                    </dd>
+                </div>
+            </dl>
+
+            <div class="account-actions">
+                <a class="btn" th:href="@{/posts}">내 글 보러가기</a>
+                <a class="btn primary" th:href="@{/posts}">새 글 작성</a>
+            </div>
+        </div>
+
+        <!-- 탈퇴 제출용 숨은 폼 -->
+        <form id="deleteAccountForm" method="post" style="display:none" th:action="@{/account/delete}">
+            <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+        </form>
+
+        <!-- 모달 -->
+        <div th:replace="~{fragments/modal :: confirm('deleteAccountModal','회원탈퇴','정말로 계정을 삭제하시겠습니까?<br>이 작업은 되돌릴 수 없습니다.','네, 탈퇴합니다','취소', true)}"></div>
+
+        <script>
+            // 모달에 제출 대상 폼 연결
+            document.addEventListener('DOMContentLoaded', function () {
+                var modal = document.getElementById('deleteAccountModal');
+                if (modal) modal.setAttribute('data-modal-submit', '#deleteAccountForm');
+            });
+        </script>
+    </div>
+</section>
 </body>
 </html>

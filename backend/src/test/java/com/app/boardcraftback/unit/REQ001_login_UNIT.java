@@ -4,7 +4,7 @@ package com.app.boardcraftback.unit;
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.Users;
 import com.app.boardcraftback.repository.UsersRepository;
-import com.app.boardcraftback.security.AppUserDetailsService;
+import com.app.boardcraftback.security.service.AppUserDetailsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.app.boardcraftback.security;
+package com.app.boardcraftback.security.userDetail;
 
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.Users;
@@ -14,23 +14,28 @@ import java.util.stream.Collectors;
 
 @Getter @ToString
 public class AppUserDetails implements UserDetails {
-    private final String userId;   // UUID 문자열(CHAR(36))
-    private final String email;    // 로그인용
-    private final String password; // bcrypt
+    public record AppUser(String userId, String nickname, String email, Set<RoleType> roles) {
+    }
+
+    // 클라이언트 측에서 사용할 사용자 정보 묶음
+    private final AppUser appUser;
+    private final String password;
     private final boolean enabled;
-    private final Set<RoleType> roles;
 
     public AppUserDetails(Users u) {
-        this.userId = u.getId();
-        this.email = u.getEmail();
+        this.appUser = new AppUser(
+                u.getId(),
+                u.getNickname(),
+                u.getEmail(),
+                u.getRoles()
+        );
         this.password = u.getPasswordHash();
         this.enabled = u.isEnabled();
-        this.roles = u.getRoles();
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return appUser.email();
     }
 
     @Override
@@ -45,7 +50,7 @@ public class AppUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
+        return appUser.roles().stream()
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
                 .collect(Collectors.toSet());
     }

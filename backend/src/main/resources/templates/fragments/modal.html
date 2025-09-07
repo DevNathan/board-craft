@@ -1,0 +1,215 @@
+<div th:fragment="confirm(id, title, message, confirmText, cancelText, isHtml)"
+     xmlns:th="http://www.thymeleaf.org">
+    <div aria-hidden="true" class="ui-modal" data-modal-submit="" th:id="${id}">
+        <div class="ui-modal__overlay" data-modal-close></div>
+        <div aria-modal="true" class="ui-modal__dialog" role="dialog" th:aria-labelledby="${id} + '_title'">
+            <div class="ui-modal__header">
+                <h3 class="ui-modal__title" th:id="${id} + '_title'" th:text="${title}">제목</h3>
+                <button aria-label="Close" class="ui-modal__close" data-modal-close type="button">&times;</button>
+            </div>
+            <!-- HTML 허용 버전 -->
+            <div class="ui-modal__body" th:if="${isHtml}" th:utext="${message}">메시지…</div>
+
+            <!-- 일반 텍스트 버전(개행 지원) -->
+            <div class="ui-modal__body" th:if="${!isHtml}"
+                 th:utext="${#strings.replace(message, '\n', '<br/>')}">메시지…
+            </div>
+
+            <div class="ui-modal__footer">
+                <button class="ui-modal__btn" data-modal-close th:text="${cancelText}" type="button">취소</button>
+                <button class="ui-modal__btn ui-modal__btn--danger" data-modal-confirm th:text="${confirmText}"
+                        type="button">확인
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .ui-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            z-index: 1000;
+        }
+
+        .ui-modal__overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, .28);
+            -webkit-backdrop-filter: saturate(140%) blur(10px);
+            backdrop-filter: saturate(140%) blur(10px);
+        }
+
+        .ui-modal__dialog {
+            position: relative;
+            margin: 12vh auto 0;
+            max-width: 420px;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            border-radius: 14px;
+            border: 1px solid rgba(60, 60, 67, .12);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, .25), 0 1px 0 rgba(255, 255, 255, .6) inset;
+            padding: 18px 16px;
+            transform: translateY(6px) scale(.985);
+            opacity: 0;
+            animation: modalIn .18s cubic-bezier(.2, .7, .2, 1) forwards;
+        }
+
+        @keyframes modalIn {
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        .ui-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        /* 닫기 버튼 우상단 */
+        .ui-modal__close {
+            position: absolute;
+            right: 4px;
+            top: 0;
+            appearance: none;
+            border: none;
+            background: transparent;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            color: #3a3a3c;
+            opacity: .6;
+        }
+
+        .ui-modal__close:hover {
+            opacity: 1;
+        }
+
+        .ui-modal__title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -.01em;
+            text-align: center;
+            color: #111;
+        }
+
+        .ui-modal__body {
+            color: #3a3a3c;
+            line-height: 1.55;
+            margin: 10px 8px 14px;
+            text-align: center;
+        }
+
+        .ui-modal__footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 12px;
+            margin-top: 6px;
+            border-top: 1px solid rgba(60, 60, 67, .12);
+        }
+
+        /* 버튼: 시스템 블루/라이트 그레이 */
+        .ui-modal__btn {
+            appearance: none;
+            border: 1px solid rgba(60, 60, 67, .29);
+            background: #f2f2f7;
+            color: #1d1d1f;
+            border-radius: 10px;
+            padding: 8px 14px;
+            min-width: 92px;
+            height: 34px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter .15s, background .15s, border-color .15s;
+        }
+
+        .ui-modal__btn:hover {
+            filter: brightness(1.02);
+        }
+
+        .ui-modal__btn:focus {
+            outline: 2px solid rgba(0, 122, 255, .4);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, .14);
+            outline-offset: 1px;
+        }
+
+        .ui-modal__btn--danger {
+            border-color: #ff3b30;
+            background: #ff3b30;
+            color: #fff;
+        }
+
+        .ui-modal__btn--danger:hover {
+            filter: brightness(1.03);
+        }
+
+        /* 모바일 시트 느낌 */
+        @media (max-width: 520px) {
+            .ui-modal__dialog {
+                margin: 10vh 12px 0
+            }
+        }
+    </style>
+
+    <script>
+        (function () {
+            if (window.__uiModalInit) return;
+            window.__uiModalInit = true;
+
+            function openModal(id) {
+                const m = document.getElementById(id);
+                if (!m) return;
+                m.classList.add('open');
+                m.setAttribute('aria-hidden', 'false');
+                // 기본 포커스: 확인 버튼 → 없으면 닫기 버튼
+                setTimeout(function () {
+                    const confirmBtn = m.querySelector('[data-modal-confirm]') || m.querySelector('.ui-modal__close');
+                    if (confirmBtn) confirmBtn.focus();
+                }, 10);
+            }
+
+            function closeModal(m) {
+                if (!m) return;
+                m.classList.remove('open');
+                m.setAttribute('aria-hidden', 'true');
+            }
+
+            document.addEventListener('click', function (e) {
+                const t = e.target, opener = t.closest('[data-modal-target]');
+                if (opener) {
+                    const id = opener.getAttribute('data-modal-target');
+                    if (id) openModal(id);
+                    return;
+                }
+                if (t.closest('[data-modal-close]')) {
+                    closeModal(t.closest('.ui-modal'));
+                    return;
+                }
+                if (t.closest('[data-modal-confirm]')) {
+                    const m = t.closest('.ui-modal');
+                    const sel = m && m.getAttribute('data-modal-submit');
+                    if (sel) {
+                        const el = document.querySelector(sel);
+                        if (el && el.tagName === 'FORM') {
+                            el.submit();
+                        }
+                    }
+                    closeModal(m);
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.ui-modal.open').forEach(closeModal);
+                }
+            });
+        })();
+    </script>
+</div>

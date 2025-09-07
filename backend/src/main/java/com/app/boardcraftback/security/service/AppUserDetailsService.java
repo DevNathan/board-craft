@@ -1,7 +1,8 @@
-package com.app.boardcraftback.security;
+package com.app.boardcraftback.security.service;
 
 import com.app.boardcraftback.domain.entity.user.Users;
 import com.app.boardcraftback.repository.UsersRepository;
+import com.app.boardcraftback.security.userDetail.AppUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
