@@ -1,7 +1,7 @@
 package com.app.boardcraftback.security.userDetail;
 
 import com.app.boardcraftback.domain.entity.user.RoleType;
-import com.app.boardcraftback.domain.entity.user.Users;
+import com.app.boardcraftback.domain.entity.user.User;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,7 +22,7 @@ public class AppUserDetails implements UserDetails {
     private final String password;
     private final boolean enabled;
 
-    public AppUserDetails(Users u) {
+    public AppUserDetails(User u) {
         this.appUser = new AppUser(
                 u.getId(),
                 u.getNickname(),

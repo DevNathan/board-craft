@@ -1,15 +1,15 @@
 package com.app.boardcraftback.repository;
 
-import com.app.boardcraftback.domain.entity.user.Users;
+import com.app.boardcraftback.domain.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UsersRepository extends JpaRepository<Users, String> {
+public interface UserRepository extends JpaRepository<User, String> {
 
-    Optional<Users> findByEmailIgnoreCase(String email);
+    Optional<User> findByEmailIgnoreCase(String email);
 
     boolean existsByNickname(String nickname);
 

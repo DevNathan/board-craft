@@ -1,7 +1,7 @@
 package com.app.boardcraftback.security.service;
 
-import com.app.boardcraftback.domain.entity.user.Users;
-import com.app.boardcraftback.repository.UsersRepository;
+import com.app.boardcraftback.domain.entity.user.User;
+import com.app.boardcraftback.repository.UserRepository;
 import com.app.boardcraftback.security.userDetail.AppUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AppUserDetailsService implements UserDetailsService {
-    private final UsersRepository usersRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String rawEmail) throws UsernameNotFoundException {
         String email = rawEmail == null ? "" : rawEmail.trim().toLowerCase();
 
-        Users user = usersRepository.findByEmailIgnoreCase(email).orElseThrow(
+        User user = userRepository.findByEmailIgnoreCase(email).orElseThrow(
                 () -> new UsernameNotFoundException("User not found with email: " + email)
         );
 

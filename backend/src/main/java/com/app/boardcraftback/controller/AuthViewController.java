@@ -1,7 +1,7 @@
 package com.app.boardcraftback.controller;
 
 import com.app.boardcraftback.api.v1.dto.auth.RegisterRequest;
-import com.app.boardcraftback.service.UsersService;
+import com.app.boardcraftback.service.UserService;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class AuthViewController {
 
-    private final UsersService usersService;
+    private final UserService userService;
 
     @GetMapping("/signup")
     public String goto_signup() {
@@ -46,7 +46,7 @@ public class AuthViewController {
 
         // 2) 서비스 호출
         try {
-            usersService.registerUser(
+            userService.registerUser(
                     form.email(),
                     form.password(),
                     form.nickname(),

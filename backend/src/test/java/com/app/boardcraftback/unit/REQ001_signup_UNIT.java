@@ -1,8 +1,8 @@
 package com.app.boardcraftback.unit;
 
 import com.app.boardcraftback.domain.entity.user.RoleType;
-import com.app.boardcraftback.domain.entity.user.Users;
-import com.app.boardcraftback.repository.UsersRepository;
+import com.app.boardcraftback.domain.entity.user.User;
+import com.app.boardcraftback.repository.UserRepository;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.app.boardcraftback.service.UsersServiceImpl;
+import com.app.boardcraftback.service.UserServiceImpl;
 
 import java.util.Optional;
 
@@ -36,18 +36,18 @@ import static org.mockito.Mockito.*;
 class REQ001_signup_UNIT {
 
     @Mock
-    UsersRepository usersRepository;
+    UserRepository userRepository;
     @Mock
     PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    UsersServiceImpl usersService;
+    UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
-        lenient().when(usersRepository.findByEmailIgnoreCase(anyString()))
+        lenient().when(userRepository.findByEmailIgnoreCase(anyString()))
                 .thenReturn(Optional.empty());
-        lenient().when(usersRepository.existsByNickname(anyString()))
+        lenient().when(userRepository.existsByNickname(anyString()))
                 .thenReturn(false);
     }
 
@@ -56,42 +56,42 @@ class REQ001_signup_UNIT {
     @DisplayName("[T-UNIT-001][REQ-001] 약관 미동의 시 IllegalArgumentException")
     void registerUser_termsNotAccepted() {
         assertThatThrownBy(() ->
-                usersService.registerUser("a@b.com", "pw", "nick", false)
+                userService.registerUser("a@b.com", "pw", "nick", false)
         ).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("terms");
 
         verifyNoInteractions(passwordEncoder);
-        verify(usersRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
     @Tag("T-UNIT-002")
     @DisplayName("[T-UNIT-002][REQ-001] 이메일 중복 시 FieldValidationException(email)")
     void registerUser_duplicateEmail() {
-        when(usersRepository.findByEmailIgnoreCase("dup@email.com"))
-                .thenReturn(Optional.of(Users.builder().build()));
+        when(userRepository.findByEmailIgnoreCase("dup@email.com"))
+                .thenReturn(Optional.of(User.builder().build()));
 
         assertThatThrownBy(() ->
-                usersService.registerUser("dup@email.com", "pw", "nick", true)
+                userService.registerUser("dup@email.com", "pw", "nick", true)
         ).isInstanceOf(FieldValidationException.class)
                 .satisfies(ex -> {
                     var e = (FieldValidationException) ex;
                     assertThat(e.getErrors()).containsEntry("email", "이미 사용 중인 이메일입니다.");
                 });
 
-        verify(usersRepository, never()).existsByNickname(anyString());
+        verify(userRepository, never()).existsByNickname(anyString());
         verify(passwordEncoder, never()).encode(anyString());
-        verify(usersRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
     @Test
     @Tag("T-UNIT-003")
     @DisplayName("[T-UNIT-003][REQ-001] 닉네임 중복 시 FieldValidationException(nickname)")
     void registerUser_duplicateNickname() {
-        when(usersRepository.existsByNickname("NICK")).thenReturn(true);
+        when(userRepository.existsByNickname("NICK")).thenReturn(true);
 
         assertThatThrownBy(() ->
-                usersService.registerUser("ok@email.com", "pw", "NICK", true)
+                userService.registerUser("ok@email.com", "pw", "NICK", true)
         ).isInstanceOf(FieldValidationException.class)
                 .satisfies(ex -> {
                     var e = (FieldValidationException) ex;
@@ -99,7 +99,7 @@ class REQ001_signup_UNIT {
                 });
 
         verify(passwordEncoder, never()).encode(anyString());
-        verify(usersRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
     }
 
     @ParameterizedTest(name = "[T-UNIT-004][REQ-001] 이메일 정규화: 입력[{0}] → 저장[{1}]")
@@ -111,12 +111,12 @@ class REQ001_signup_UNIT {
     })
     void registerUser_emailNormalization(String input, String expected) {
         when(passwordEncoder.encode(anyString())).thenAnswer(inv -> "ENC(" + inv.getArgument(0) + ")");
-        when(usersRepository.save(any(Users.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        usersService.registerUser(input, "pw", "nick", true);
+        userService.registerUser(input, "pw", "nick", true);
 
-        var captor = ArgumentCaptor.forClass(Users.class);
-        verify(usersRepository).save(captor.capture());
+        var captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
         assertThat(captor.getValue().getEmail()).isEqualTo(expected);
     }
 
@@ -125,12 +125,12 @@ class REQ001_signup_UNIT {
     @DisplayName("[T-UNIT-005][REQ-001] 정상 등록: 패스워드 해싱, USER 롤 부여, save 호출")
     void registerUser_success() {
         when(passwordEncoder.encode(anyString())).thenAnswer(inv -> "ENC(" + inv.getArgument(0) + ")");
-        when(usersRepository.save(any(Users.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Users result = usersService.registerUser("a@b.com", "plainPW", "nick", true);
+        User result = userService.registerUser("a@b.com", "plainPW", "nick", true);
 
-        var captor = ArgumentCaptor.forClass(Users.class);
-        verify(usersRepository).save(captor.capture());
+        var captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
         var saved = captor.getValue();
 
         assertThat(saved.getEmail()).isEqualTo("a@b.com");
@@ -147,12 +147,12 @@ class REQ001_signup_UNIT {
     @DisplayName("[T-UNIT-006][REQ-001] rawEmail == null → 빈문자열로 정규화되어도 흐름 유지")
     void registerUser_nullEmailBecomesEmptyString() {
         when(passwordEncoder.encode(anyString())).thenAnswer(inv -> "ENC(" + inv.getArgument(0) + ")");
-        when(usersRepository.save(any(Users.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        usersService.registerUser(null, "pw", "nick", true);
+        userService.registerUser(null, "pw", "nick", true);
 
-        var captor = ArgumentCaptor.forClass(Users.class);
-        verify(usersRepository).save(captor.capture());
+        var captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
         assertThat(captor.getValue().getEmail()).isEqualTo("");
     }
 }

@@ -1,8 +1,8 @@
 package com.app.boardcraftback.service;
 
 import com.app.boardcraftback.domain.entity.user.RoleType;
-import com.app.boardcraftback.domain.entity.user.Users;
-import com.app.boardcraftback.repository.UsersRepository;
+import com.app.boardcraftback.domain.entity.user.User;
+import com.app.boardcraftback.repository.UserRepository;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,8 +14,8 @@ import static java.util.Map.of;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UsersServiceImpl implements UsersService {
-    private final UsersRepository usersRepository;
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -31,7 +31,7 @@ public class UsersServiceImpl implements UsersService {
      * @param rawPassword 평문 비밀번호 (해싱되어 저장)
      * @param nickname    닉네임 (고유해야 함)
      * @param terms       서비스 약관 동의 여부
-     * @return 저장된 {@link Users} 엔티티
+     * @return 저장된 {@link User} 엔티티
      *
      * @throws FieldValidationException
      *         입력 필드가 비즈니스 규칙을 위반한 경우.
@@ -47,7 +47,7 @@ public class UsersServiceImpl implements UsersService {
      * 동일한 응답 포맷(400 + validation map)으로 처리하기 위함이다.
      */
     @Override
-    public Users registerUser(String rawEmail, String rawPassword, String nickname, boolean terms) {
+    public User registerUser(String rawEmail, String rawPassword, String nickname, boolean terms) {
         if (!terms) throw new FieldValidationException(of("terms", "약관 동의가 필요합니다."));
 
         final String email = rawEmail == null ? "" : rawEmail.trim().toLowerCase();
@@ -59,7 +59,7 @@ public class UsersServiceImpl implements UsersService {
 
         String hashed = passwordEncoder.encode(rawPassword);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .email(email)
                 .passwordHash(hashed)
                 .nickname(nickname)
@@ -67,7 +67,7 @@ public class UsersServiceImpl implements UsersService {
                 .build();
         user.getRoles().add(RoleType.USER);
 
-        return usersRepository.save(user);
+        return userRepository.save(user);
     }
     /**
      * 이메일이 사용 가능하지 않으면 {@code FieldValidationException}을 던진다.
@@ -76,7 +76,7 @@ public class UsersServiceImpl implements UsersService {
      * @throws com.app.boardcraftback.support.error.FieldValidationException email 중복 시
      */
     private void assertEmailAvailable(String email) {
-        if (usersRepository.findByEmailIgnoreCase(email).isPresent()) {
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
             throw new FieldValidationException(of("email", "이미 사용 중인 이메일입니다."));
         }
     }
@@ -87,7 +87,7 @@ public class UsersServiceImpl implements UsersService {
      * @throws com.app.boardcraftback.support.error.FieldValidationException nickname 중복 시
      */
     private void assertNicknameAvailable(String nickname) {
-        if (usersRepository.existsByNickname(nickname)) {
+        if (userRepository.existsByNickname(nickname)) {
             throw new FieldValidationException(of("nickname", "이미 사용 중인 닉네임입니다."));
         }
     }

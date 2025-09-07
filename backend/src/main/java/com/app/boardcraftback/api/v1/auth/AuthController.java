@@ -2,7 +2,7 @@ package com.app.boardcraftback.api.v1.auth;
 
 import com.app.boardcraftback.api.v1.dto.auth.RegisterRequest;
 import com.app.boardcraftback.api.v1.dto.auth.RegisterResponse;
-import com.app.boardcraftback.service.UsersService;
+import com.app.boardcraftback.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private final UsersService usersService;
+    private final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody RegisterRequest req) {
-        var u = usersService.registerUser(req.email(), req.password(), req.nickname(), req.terms());
+        var u = userService.registerUser(req.email(), req.password(), req.nickname(), req.terms());
         return ResponseEntity
                 .status(201)
                 .body(new RegisterResponse(u.getId(), u.getEmail(), u.getNickname()));
