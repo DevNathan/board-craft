@@ -3,6 +3,7 @@ package com.app.boardcraftback.unit;
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.User;
 import com.app.boardcraftback.repository.UserRepository;
+import com.app.boardcraftback.service.UserServiceImpl;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.app.boardcraftback.service.UserServiceImpl;
 
 import java.util.Optional;
 
@@ -45,20 +45,18 @@ class REQ001_signup_UNIT {
 
     @BeforeEach
     void setUp() {
-        lenient().when(userRepository.findByEmailIgnoreCase(anyString()))
-                .thenReturn(Optional.empty());
-        lenient().when(userRepository.existsByNickname(anyString()))
-                .thenReturn(false);
+        lenient().when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
+        lenient().when(userRepository.existsByNickname(anyString())).thenReturn(false);
     }
 
     @Test
     @Tag("T-UNIT-001")
     @DisplayName("[T-UNIT-001][REQ-001] 약관 미동의 시 IllegalArgumentException")
     void registerUser_termsNotAccepted() {
-        assertThatThrownBy(() ->
-                userService.registerUser("a@b.com", "pw", "nick", false)
-        ).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("terms");
+        assertThatThrownBy(() -> userService.registerUser("a@b.com", "pw", "nick", false)).isInstanceOf(FieldValidationException.class).satisfies(ex -> {
+            var e = (FieldValidationException) ex;
+            assertThat(e.getErrors()).containsEntry("terms", "약관 동의가 필요합니다.");
+        });
 
         verifyNoInteractions(passwordEncoder);
         verify(userRepository, never()).save(any());
@@ -68,16 +66,12 @@ class REQ001_signup_UNIT {
     @Tag("T-UNIT-002")
     @DisplayName("[T-UNIT-002][REQ-001] 이메일 중복 시 FieldValidationException(email)")
     void registerUser_duplicateEmail() {
-        when(userRepository.findByEmailIgnoreCase("dup@email.com"))
-                .thenReturn(Optional.of(User.builder().build()));
+        when(userRepository.findByEmailIgnoreCase("dup@email.com")).thenReturn(Optional.of(User.builder().build()));
 
-        assertThatThrownBy(() ->
-                userService.registerUser("dup@email.com", "pw", "nick", true)
-        ).isInstanceOf(FieldValidationException.class)
-                .satisfies(ex -> {
-                    var e = (FieldValidationException) ex;
-                    assertThat(e.getErrors()).containsEntry("email", "이미 사용 중인 이메일입니다.");
-                });
+        assertThatThrownBy(() -> userService.registerUser("dup@email.com", "pw", "nick", true)).isInstanceOf(FieldValidationException.class).satisfies(ex -> {
+            var e = (FieldValidationException) ex;
+            assertThat(e.getErrors()).containsEntry("email", "이미 사용 중인 이메일입니다.");
+        });
 
         verify(userRepository, never()).existsByNickname(anyString());
         verify(passwordEncoder, never()).encode(anyString());
@@ -90,13 +84,10 @@ class REQ001_signup_UNIT {
     void registerUser_duplicateNickname() {
         when(userRepository.existsByNickname("NICK")).thenReturn(true);
 
-        assertThatThrownBy(() ->
-                userService.registerUser("ok@email.com", "pw", "NICK", true)
-        ).isInstanceOf(FieldValidationException.class)
-                .satisfies(ex -> {
-                    var e = (FieldValidationException) ex;
-                    assertThat(e.getErrors()).containsEntry("nickname", "이미 사용 중인 닉네임입니다.");
-                });
+        assertThatThrownBy(() -> userService.registerUser("ok@email.com", "pw", "NICK", true)).isInstanceOf(FieldValidationException.class).satisfies(ex -> {
+            var e = (FieldValidationException) ex;
+            assertThat(e.getErrors()).containsEntry("nickname", "이미 사용 중인 닉네임입니다.");
+        });
 
         verify(passwordEncoder, never()).encode(anyString());
         verify(userRepository, never()).save(any());
@@ -104,11 +95,7 @@ class REQ001_signup_UNIT {
 
     @ParameterizedTest(name = "[T-UNIT-004][REQ-001] 이메일 정규화: 입력[{0}] → 저장[{1}]")
     @Tag("T-UNIT-004")
-    @CsvSource({
-            "'  USER@Mail.COM  ', user@mail.com",
-            "'USER@MAIL.COM', user@mail.com",
-            "'user@mail.com', user@mail.com"
-    })
+    @CsvSource({"'  USER@Mail.COM  ', user@mail.com", "'USER@MAIL.COM', user@mail.com", "'user@mail.com', user@mail.com"})
     void registerUser_emailNormalization(String input, String expected) {
         when(passwordEncoder.encode(anyString())).thenAnswer(inv -> "ENC(" + inv.getArgument(0) + ")");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
