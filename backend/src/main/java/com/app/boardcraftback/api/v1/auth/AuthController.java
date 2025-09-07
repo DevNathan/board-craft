@@ -1,8 +1,8 @@
 package com.app.boardcraftback.api.v1.auth;
 
-import com.app.boardcraftback.api.v1.dto.auth.RegisterRequest;
-import com.app.boardcraftback.api.v1.dto.auth.RegisterResponse;
-import com.app.boardcraftback.service.UserService;
+import com.app.boardcraftback.domain.dto.auth.RegisterRequest;
+import com.app.boardcraftback.domain.dto.auth.RegisterResponse;
+import com.app.boardcraftback.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -3,7 +3,7 @@ package com.app.boardcraftback.unit;
 import com.app.boardcraftback.domain.entity.user.RoleType;
 import com.app.boardcraftback.domain.entity.user.User;
 import com.app.boardcraftback.repository.UserRepository;
-import com.app.boardcraftback.service.UserServiceImpl;
+import com.app.boardcraftback.service.user.UserServiceImpl;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

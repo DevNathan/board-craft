@@ -1,4 +1,4 @@
-package com.app.boardcraftback.api.v1.dto.auth;
+package com.app.boardcraftback.domain.dto.auth;
 
 import jakarta.validation.constraints.*;
 

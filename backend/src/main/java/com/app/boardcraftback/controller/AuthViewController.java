@@ -1,7 +1,7 @@
 package com.app.boardcraftback.controller;
 
-import com.app.boardcraftback.api.v1.dto.auth.RegisterRequest;
-import com.app.boardcraftback.service.UserService;
+import com.app.boardcraftback.domain.dto.auth.RegisterRequest;
+import com.app.boardcraftback.service.user.UserService;
 import com.app.boardcraftback.support.error.FieldValidationException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,8 @@ public class AuthViewController {
     private final UserService userService;
 
     @GetMapping("/signup")
-    public String goto_signup() {
+    public String gotoSignup(Model model) {
+        model.addAttribute("form", new RegisterRequest("", "", "", false));
         return "auth/signup";
     }
 
@@ -44,7 +45,7 @@ public class AuthViewController {
             return "auth/signup";
         }
 
-        // 2) 서비스 호출
+        // 서비스 호출
         try {
             userService.registerUser(
                     form.email(),
@@ -53,19 +54,12 @@ public class AuthViewController {
                     form.terms()
             );
         } catch (FieldValidationException ve) {
-
-            // 서비스에서 올린 필드별 에러 맵(email/nickname/terms 등)
-            model.addAttribute("fieldErrors", ve.getErrors());
-            return "auth/signup";
-        } catch (IllegalArgumentException iae) {
-            // 약관 등 비즈 규칙 일반 예외
-            var map = new HashMap<String, String>();
-            map.put("terms", iae.getMessage());
-            model.addAttribute("fieldErrors", map);
+            ve.getErrors().forEach((field, msg) ->
+                    binding.rejectValue(field, "business", msg)
+            );
             return "auth/signup";
         }
 
-        // 3) 성공: 로그인 페이지로 유도 (자동 로그인 원하면 아래 보너스 참고)
         return "redirect:/auth/signin?registered=1";
     }
 

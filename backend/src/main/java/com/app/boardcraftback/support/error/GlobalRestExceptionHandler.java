@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
@@ -13,8 +14,8 @@ import java.util.Map;
 
 import static com.app.boardcraftback.support.web.TraceIdFilter.TRACE_ID;
 
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+@RestControllerAdvice(annotations = RestController.class)
+public class GlobalRestExceptionHandler {
 
     // 400: @Valid 바디 검증 실패 (JSON)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -35,15 +36,13 @@ public class GlobalExceptionHandler {
     // 비즈니스 예외처리
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleApp(AppException ex, HttpServletRequest req) {
-        var code = ex.getCode();
-        return build(req, code.getStatus(), code.name(), code.getMessage(), null);
+        return build(req, ex.getStatus(), ex.getStatus().name(), ex.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAny(Exception ex, HttpServletRequest req) {
-        var code = ErrorCode.INTERNAL_ERROR;
         ex.printStackTrace();
-        return build(req, code.getStatus(), code.name(), code.getMessage(), null);
+        return build(req, HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.name(), ex.getMessage(), null);
     }
 
     private ResponseEntity<ErrorResponse> build(HttpServletRequest req, HttpStatus status,

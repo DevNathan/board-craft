@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko-KR"
+      layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>서버 오류가 발생했습니다</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <style>
+        .error-wrap {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .error-card {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            display: grid;
+            gap: 10px;
+        }
+
+        .error-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: .04em;
+            color: #e74c3c;
+            margin: 0;
+        }
+
+        .error-title {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #222;
+        }
+
+        .error-desc {
+            margin: 2px 0 0;
+            color: #555;
+            text-align: center;
+        }
+
+        .error-meta {
+            margin-top: 8px;
+            color: #777;
+            font-size: .9rem;
+            text-align: center;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .error-btn {
+            appearance: none;
+            border: 1px solid #e0e3e7;
+            background: #fff;
+            color: #222;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .error-btn.primary {
+            border-color: #2962ff;
+            background: #2962ff;
+            color: #fff;
+        }
+
+        details.error-details {
+            margin-top: 8px;
+            border-top: 1px dashed #e0e3e7;
+            padding-top: 10px;
+            color: #444;
+        }
+
+        details.error-details pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 6px 0 0;
+            font-size: .9rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="error-wrap">
+        <div class="error-card">
+            <div class="error-header">
+                <h1 class="error-code">500</h1>
+                <h2 class="error-title">서버에서 에러가 발생했습니다</h2>
+            </div>
+            <p class="error-desc">잠깐 숨 고르고 다시 시도해 보죠.</p>
+
+            <div class="error-meta">
+                <div>요청 경로: <code th:text="${path}">/error</code></div>
+                <div>요청 ID: <code
+                        th:text="${error != null and error.requestId != null ? error.requestId : requestId}">—</code>
+                </div>
+                <div>메시지: <span th:text="${message}">—</span></div>
+            </div>
+
+            <div class="error-actions">
+                <button class="error-btn primary" onclick="location.reload()" type="button">새로고침</button>
+                <a class="error-btn" th:href="@{/}">홈으로</a>
+            </div>
+
+            <!-- trace가 있을 때만(로컬/스테이징 디버깅용) -->
+            <details class="error-details" th:if="${TRACE_ID}">
+                <summary>오류 세부정보</summary>
+                <pre th:text="${TRACE_ID}">stacktrace</pre>
+            </details>
+        </div>
+    </div>
+</section>
+</body>
+</html>

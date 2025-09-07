@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko-KR"
+      layout:decorate="~{layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>페이지를 찾을 수 없습니다</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <style>
+        .error-wrap {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 16px;
+            box-sizing: border-box;
+        }
+
+        .error-card {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            text-align: center;
+            display: grid;
+            gap: 10px;
+        }
+
+        .error-code {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: .04em;
+            color: #2962ff;
+            margin: 0;
+        }
+
+        .error-title {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #222;
+        }
+
+        .error-desc {
+            margin: 2px 0 0;
+            color: #555;
+        }
+
+        .error-meta {
+            margin-top: 10px;
+            color: #777;
+            font-size: .9rem;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .error-btn {
+            appearance: none;
+            border: 1px solid #e0e3e7;
+            background: #fff;
+            color: #222;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .error-btn.primary {
+            border-color: #2962ff;
+            background: #2962ff;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="error-wrap">
+        <div class="error-card">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-title">페이지를 찾을 수 없습니다</h2>
+            <p class="error-desc">주소가 바뀌었거나, 존재하지 않는 경로입니다.</p>
+
+            <div class="error-meta">
+                <span>요청 경로:</span>
+                <code th:text="${path}">/unknown</code>
+            </div>
+
+            <div class="error-actions">
+                <a class="error-btn primary" th:href="@{/}">홈으로</a>
+                <a class="error-btn" th:href="@{/posts}">게시글 보기</a>
+                <button class="error-btn" onclick="history.back()" type="button">이전 페이지</button>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

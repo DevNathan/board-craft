@@ -94,48 +94,38 @@
 <section class="signup-box" layout:fragment="content">
     <h2 class="signup-title">회원가입</h2>
 
-    <!-- 전역 에러(예: 400 바디에서 전달한 메시지) -->
+    <!-- 전역 에러 -->
     <div class="signup-error" th:if="${globalError}" th:text="${globalError}"></div>
 
-    <form class="signup-form" method="post" th:action="@{/auth/signup}">
+    <!-- form 객체 바인딩 -->
+    <form class="signup-form" th:object="${form}" th:action="@{/auth/signup}" method="post">
         <!-- CSRF -->
         <input th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
 
         <div class="signup-field">
             <label for="email">이메일</label>
-            <input class="signup-input" id="email" name="email" placeholder="you@example.com" required th:value="${form != null} ? ${form.email} : ${param.email}"
-                   type="email"/>
-            <div class="signup-error" th:if="${fieldErrors != null and fieldErrors.containsKey('email')}"
-                 th:text="${fieldErrors.get('email')}"></div>
+            <input class="signup-input" id="email" th:field="*{email}" placeholder="you@example.com" type="email" required/>
+            <div class="signup-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
         </div>
 
         <div class="signup-field">
             <label for="nickname">닉네임</label>
-            <input class="signup-input" id="nickname" maxlength="30" minlength="2" name="nickname" placeholder="표시할 이름" required
-                   th:value="${form != null} ? ${form.nickname} : ${param.nickname}"
-                   type="text"/>
-            <div class="signup-error" th:if="${fieldErrors != null and fieldErrors.containsKey('nickname')}"
-                 th:text="${fieldErrors.get('nickname')}"></div>
+            <input class="signup-input" id="nickname" th:field="*{nickname}" placeholder="표시할 이름" type="text" minlength="2" maxlength="30" required/>
+            <div class="signup-error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
         </div>
 
         <div class="signup-field">
             <label for="password">비밀번호</label>
-            <input class="signup-input" id="password" minlength="8" name="password" placeholder="8자 이상 권장" required
-                   type="password"/>
+            <input class="signup-input" id="password" th:field="*{password}" placeholder="8자 이상 권장" type="password" minlength="8" required/>
             <div class="signup-notice">영문/숫자/특수문자 조합 권장</div>
-            <div class="signup-error" th:if="${fieldErrors != null and fieldErrors.containsKey('password')}"
-                 th:text="${fieldErrors.get('password')}"></div>
+            <div class="signup-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
         </div>
 
         <div class="signup-row">
-            <!-- 체크박스 건드리지 않을 시 false -->
-            <input name="terms" type="hidden" value="false"/>
-            <input id="terms" name="terms" th:checked="${form != null ? form.terms : (#strings.equals(param.terms, 'true'))}" type="checkbox"
-                   value="true"/>
+            <input id="terms" th:field="*{terms}" type="checkbox"/>
             <label for="terms">약관에 동의합니다</label>
         </div>
-        <div class="signup-error" th:if="${fieldErrors != null and fieldErrors.containsKey('terms')}"
-             th:text="${fieldErrors.get('terms')}"></div>
+        <div class="signup-error" th:if="${#fields.hasErrors('terms')}" th:errors="*{terms}"></div>
 
         <button class="signup-btn" type="submit">가입하기</button>
 

@@ -1,4 +1,4 @@
-package com.app.boardcraftback.api.v1.dto.auth;
+package com.app.boardcraftback.domain.dto.auth;
 
 public record RegisterResponse(String userId, String email, String nickname) {
 }
